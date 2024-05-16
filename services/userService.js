@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const UserModel = require('../models/UserModel');
 const bcrypt = require('bcrypt');
+const jsonwebtoken = require('jsonwebtoken');
 const { MONGODB_CONNECTION_URI } = process.env;
 
 const createUser = async (user) => {
@@ -35,7 +36,17 @@ const authenticateUser = async ({
       throw new Error();
     }
 
-    return user;
+    return jsonwebtoken.sign(
+      {
+        userId: user._id,
+        email: user.email,
+        permissions: user.permissions
+      },
+      'MY_SUPER_STRONG_PASSWORD',
+      {
+        expiresIn: 3600
+      }
+    );
   } catch (error) {
     console.log(error);
     throw error;

@@ -17,7 +17,7 @@ const UserSchema = new mongoose.Schema({
   lastName: String,
   created: Date,
   modified: Date,
-  permissions: {}
+  permissions: Array
 });
 
 UserSchema.pre('save', function(next) {
