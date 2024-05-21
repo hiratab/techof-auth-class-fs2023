@@ -3,6 +3,7 @@ const {
   createUser,
   authenticateUser,
   forgotPassword,
+  resetPassword,
 } = require('../services/userService');
 
 const userRouter = express.Router();
@@ -52,5 +53,16 @@ userRouter.post('/forgot-password', async (req, res) => {
   }
 });
 
+userRouter.post('/reset-password', async (req, res) => {
+  try {
+    const { email, token, password } = req.body;
+
+    await resetPassword({ email, token, password });
+    res.status(201).send();
+  } catch (error) {
+    console.log(error);
+    res.status(400).send('Error while changing password');
+  }
+});
 
 module.exports = userRouter;

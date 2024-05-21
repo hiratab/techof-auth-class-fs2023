@@ -69,9 +69,9 @@ const forgotPassword = async ({ email }) => {
     }
 
     user.resetPasswordToken = Math.random();
-    await user.save();
-
+    
     await sendForgotPasswordEmail(user);
+    await user.save();
     return;
   } catch (error) {
     console.log(error);
@@ -81,8 +81,38 @@ const forgotPassword = async ({ email }) => {
   }
 };
 
-const resetPassword = async ({ email, token }) => {
+const resetPassword = async ({ email, token, password }) => {
+  try {
+    await mongoose.connect(MONGODB_CONNECTION_URI);
 
+    const user = await UserModel.findOne({
+      email,
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    if (!user.resetPasswordToken) {
+      throw new Error('No reset password token');
+    }
+
+    const result = await bcrypt.compare(token, user.resetPasswordToken);
+    if (!result) {
+      throw new Error('Token does not match');
+    }
+
+    user.password = password;
+    user.resetPasswordToken = null;
+    await user.save();
+
+    return;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  } finally {
+    await mongoose.connection.close();
+  }
 }
 
 module.exports = {
