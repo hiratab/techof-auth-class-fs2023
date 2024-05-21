@@ -1,5 +1,9 @@
 const express = require('express');
-const { createUser, authenticateUser } = require('../services/userService');
+const {
+  createUser,
+  authenticateUser,
+  forgotPassword,
+} = require('../services/userService');
 
 const userRouter = express.Router();
 
@@ -36,5 +40,17 @@ userRouter.post('/login', async (req, res) => {
     });
   }
 });
+
+userRouter.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    await forgotPassword({ email });
+    res.status(201).send();
+  } catch (error) {
+    res.status(400).send('Error while sending email');
+  }
+});
+
 
 module.exports = userRouter;

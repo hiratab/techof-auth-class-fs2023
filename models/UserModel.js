@@ -17,7 +17,8 @@ const UserSchema = new mongoose.Schema({
   lastName: String,
   created: Date,
   modified: Date,
-  permissions: Array
+  permissions: Array,
+  resetPasswordToken: String,
 });
 
 UserSchema.pre('save', function(next) {
@@ -25,6 +26,12 @@ UserSchema.pre('save', function(next) {
     const salt = bcrypt.genSaltSync(10);
     const hash = bcrypt.hashSync(this.password, salt);
     this.password = hash;
+  }
+  
+  if (this.resetPasswordToken && this.isModified('resetPasswordToken')) {
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync(this.resetPasswordToken, salt);
+    this.resetPasswordToken = hash;
   }
 
   return next();

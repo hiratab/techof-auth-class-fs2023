@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
-const UserModel = require('../models/UserModel');
 const bcrypt = require('bcrypt');
 const jsonwebtoken = require('jsonwebtoken');
+const UserModel = require('../models/UserModel');
+const { sendForgotPasswordEmail } = require('./sendMailService');
 const { MONGODB_CONNECTION_URI } = process.env;
 
 const createUser = async (user) => {
@@ -55,7 +56,38 @@ const authenticateUser = async ({
   }
 }
 
+const forgotPassword = async ({ email }) => {
+  try {
+    await mongoose.connect(MONGODB_CONNECTION_URI);
+
+    const user = await UserModel.findOne({
+      email,
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    user.resetPasswordToken = Math.random();
+    await user.save();
+
+    await sendForgotPasswordEmail(user);
+    return;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  } finally {
+    await mongoose.connection.close();
+  }
+};
+
+const resetPassword = async ({ email, token }) => {
+
+}
+
 module.exports = {
   createUser,
   authenticateUser,
+  forgotPassword,
+  resetPassword,
 }
