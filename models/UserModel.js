@@ -21,6 +21,27 @@ const UserSchema = new mongoose.Schema({
   resetPasswordToken: String,
 });
 
+UserSchema.methods = {
+  authenticate: async function(plainTextPassword) {
+    const result = await bcrypt.compare(plainTextPassword, this.password);
+    if (!result) {
+      throw new Error('Password does not match');
+    }
+  },
+  generateResetPasswordToken: function() {
+    this.resetPasswordToken = Math.round(Math.random() * 100000);
+  },
+  resetPassword: async function(token, password) {
+    const result = await bcrypt.compare(token, this.resetPasswordToken);
+    if (!result) {
+      throw new Error('Token does not match');
+    }
+
+    this.password = password;
+    this.resetPasswordToken = null;
+  }
+};
+
 UserSchema.pre('save', function(next) {
   if (this.password && this.isModified('password')) {
     const salt = bcrypt.genSaltSync(10);

@@ -37,7 +37,7 @@ userRouter.post('/login', async (req, res) => {
   } catch (error) {
     res.status(400).json({
       status: 'failure',
-      data: error
+      data: error.message
     });
   }
 });

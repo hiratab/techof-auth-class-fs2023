@@ -30,12 +30,7 @@ const authenticateUser = async ({
       email
     });
 
-    const result = await bcrypt.compare(password, user.password);
-    console.log('result', result);
-
-    if (!result) {
-      throw new Error();
-    }
+    await user.authenticate(password);
 
     return jsonwebtoken.sign(
       {
@@ -68,7 +63,7 @@ const forgotPassword = async ({ email }) => {
       throw new Error('User not found');
     }
 
-    user.resetPasswordToken = Math.random();
+    user.generateResetPasswordToken();
     
     await sendForgotPasswordEmail(user);
     await user.save();
@@ -97,13 +92,7 @@ const resetPassword = async ({ email, token, password }) => {
       throw new Error('No reset password token');
     }
 
-    const result = await bcrypt.compare(token, user.resetPasswordToken);
-    if (!result) {
-      throw new Error('Token does not match');
-    }
-
-    user.password = password;
-    user.resetPasswordToken = null;
+    await user.resetPassword(token, password);
     await user.save();
 
     return;
