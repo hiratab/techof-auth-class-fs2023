@@ -4,6 +4,7 @@ const {
   authenticateUser,
   forgotPassword,
   resetPassword,
+  deactivateUser,
 } = require('../services/userService');
 
 const userRouter = express.Router();
@@ -63,6 +64,20 @@ userRouter.post('/reset-password', async (req, res) => {
     console.log(error);
     res.status(400).send('Error while changing password');
   }
+});
+
+userRouter.delete('/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  if (!userId) {
+    return res.status(400).send('No User ID');
+  }
+
+  await deactivateUser({ userId });
+  return res.send({
+    status: 'success',
+    data: {}
+  });
 });
 
 module.exports = userRouter;

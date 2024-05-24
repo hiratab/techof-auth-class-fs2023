@@ -19,6 +19,10 @@ const UserSchema = new mongoose.Schema({
   modified: Date,
   permissions: Array,
   resetPasswordToken: String,
+  active: {
+    type: Boolean,
+    default: true,
+  }
 });
 
 UserSchema.methods = {
@@ -39,6 +43,9 @@ UserSchema.methods = {
 
     this.password = password;
     this.resetPasswordToken = null;
+  },
+  deactivateUser: function() {
+    this.active = false;
   }
 };
 

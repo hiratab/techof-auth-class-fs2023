@@ -30,6 +30,10 @@ const authenticateUser = async ({
       email
     });
 
+    if (!user || !user.active) {
+      throw new Error('User not found');
+    }
+
     await user.authenticate(password);
 
     return jsonwebtoken.sign(
@@ -104,9 +108,34 @@ const resetPassword = async ({ email, token, password }) => {
   }
 }
 
+const deactivateUser = async ({ userId }) => {
+  try {
+    await mongoose.connect(MONGODB_CONNECTION_URI);
+
+    const user = await UserModel.findOne({
+      _id: userId,
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    user.deactivateUser();
+    await user.save();
+
+    return;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  } finally {
+    await mongoose.connection.close();
+  }
+}
+
 module.exports = {
   createUser,
   authenticateUser,
   forgotPassword,
   resetPassword,
+  deactivateUser,
 }
